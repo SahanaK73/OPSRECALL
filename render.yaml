@@ -1,0 +1,27 @@
+# Render Blueprint: deploys the OpsRecall API. Secrets are entered in the Render dashboard (sync: false), never stored here.
+services:
+  - type: web
+    name: opsrecall-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: MONGODB_URI
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: HINDSIGHT_API_KEY
+        sync: false
+      - key: HINDSIGHT_BASE_URL
+        value: https://api.hindsight.vectorize.io
+      - key: HINDSIGHT_BANK_ID
+        value: opsrecall-incidents
+      - key: CORS_ORIGIN
+        sync: false

@@ -164,3 +164,15 @@ See `DEMO_SCRIPT.md` for a timed 4-minute script.
 ## 10. Security notes
 
 API keys only in `backend/.env`; Helmet, CORS allow-list, body-size limits, schema validation on every input and on LLM output; no secrets are logged; never commit `.env`.
+
+## Deploy online (Render + Netlify)
+
+Share one link instead of asking people to install anything.
+
+1. **Backend on Render.** New + -> Blueprint -> select this repo (uses `render.yaml`). Fill in `MONGODB_URI`, `GROQ_API_KEY`, `HINDSIGHT_API_KEY`. Leave `CORS_ORIGIN` empty for now. Copy the service URL (e.g. `https://opsrecall-api.onrender.com`).
+2. **MongoDB Atlas.** Network Access -> allow `0.0.0.0/0` so Render can connect.
+3. **Frontend on Netlify.** Add new site -> Import from Git -> select this repo (uses `netlify.toml`). Under Site configuration -> Environment variables add `VITE_API_URL` = `https://YOUR-RENDER-URL/api`, then deploy. Copy the Netlify URL.
+4. **Back on Render**, set `CORS_ORIGIN` to the Netlify URL (no trailing slash) and let it redeploy.
+5. Open the Netlify URL. Check `https://YOUR-RENDER-URL/api/health?deep=true`.
+
+Notes: the Render free tier sleeps when idle (first request takes ~30s). The app has no login, so anyone with the link can use your Groq/Hindsight quota; share it only with your team.

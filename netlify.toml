@@ -1,0 +1,14 @@
+# Netlify: deploys the OpsRecall frontend. Set VITE_API_URL in Site settings -> Environment variables.
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# React Router: send every path to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
