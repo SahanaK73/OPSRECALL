@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'node:path';
+import { existsSync } from 'node:fs';
 import cors from 'cors';
 import helmet from 'helmet';
 import incidentRoutes from './routes/incident.routes';
@@ -36,6 +38,12 @@ export function createApp(corsOrigin = 'http://localhost:5173') {
   app.use('/api/incidents', analysisRoutes);
   app.use('/api/incidents', resolutionRoutes);
   app.use('/api/memory', memoryRoutes);
+
+  const publicDir = path.resolve(__dirname, '../public');
+  if (existsSync(path.join(publicDir, 'index.html'))) {
+    app.use(express.static(publicDir));
+    app.get(/^(?!\/api(?:\/|$)).*/, (_req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+  }
 
   app.use(notFoundHandler);
   app.use(errorHandler);
