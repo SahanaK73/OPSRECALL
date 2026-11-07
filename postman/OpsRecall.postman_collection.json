@@ -1,0 +1,22 @@
+{
+  "info": { "name": "OpsRecall API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" },
+  "variable": [ { "key": "baseUrl", "value": "http://localhost:5000/api" }, { "key": "incidentId", "value": "" } ],
+  "item": [
+    { "name": "Health (deep)", "request": { "method": "GET", "url": "{{baseUrl}}/health?deep=true" } },
+    { "name": "Synthetic scenarios", "request": { "method": "GET", "url": "{{baseUrl}}/incidents/synthetic" } },
+    { "name": "Create incident (synthetic scenario 2)",
+      "event": [ { "listen": "test", "script": { "exec": [ "pm.test('201', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('incidentId', pm.response.json()._id);" ] } } ],
+      "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/incidents",
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"Payment request failures spike after v2.14 deployment\",\n  \"serviceName\": \"payment-service\",\n  \"severity\": \"High\",\n  \"environment\": \"production\",\n  \"errorMessage\": \"Error: connection timeout - timeout acquiring database connection\",\n  \"logDetails\": \"ERROR payment-service db: connection timeout while acquiring connection\",\n  \"symptoms\": \"Increased payment request failures after deployment; database timeout errors\",\n  \"recentDeployment\": \"payment-service v2.14.0 deployed 20 minutes ago\",\n  \"occurredAt\": \"2026-03-09T14:10:00Z\",\n  \"isSynthetic\": true\n}" } } },
+    { "name": "Create incident - INVALID (expect 400)", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/incidents", "body": { "mode": "raw", "raw": "{ \"title\": \"x\", \"severity\": \"Huge\" }" } } },
+    { "name": "List incidents", "request": { "method": "GET", "url": "{{baseUrl}}/incidents" } },
+    { "name": "Get incident", "request": { "method": "GET", "url": "{{baseUrl}}/incidents/{{incidentId}}" } },
+    { "name": "Analyze WITHOUT memory", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/incidents/{{incidentId}}/analyze", "body": { "mode": "raw", "raw": "{ \"useMemory\": false }" } } },
+    { "name": "Analyze WITH Hindsight memory", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/incidents/{{incidentId}}/analyze", "body": { "mode": "raw", "raw": "{ \"useMemory\": true }" } } },
+    { "name": "Resolve + retain", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/incidents/{{incidentId}}/resolve",
+        "body": { "mode": "raw", "raw": "{\n  \"actualRootCause\": \"Connection pool max was 10 (staging value) in production\",\n  \"resolutionApplied\": \"Raised pool max to 50 and set acquire timeout 10s\",\n  \"verificationResults\": \"Pool utilisation < 60% at peak; payment success back to 99.9%\",\n  \"serviceRecovered\": true,\n  \"engineerName\": \"Test Engineer\",\n  \"engineerConfirmed\": true\n}" } } },
+    { "name": "Memory (retained + Hindsight facts)", "request": { "method": "GET", "url": "{{baseUrl}}/memory" } },
+    { "name": "Memory raw recall", "request": { "method": "GET", "url": "{{baseUrl}}/memory/search?q=database connection timeout payment" } },
+    { "name": "Dashboard stats", "request": { "method": "GET", "url": "{{baseUrl}}/incidents/stats" } }
+  ]
+}
