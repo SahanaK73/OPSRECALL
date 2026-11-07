@@ -7,7 +7,7 @@ const envSchema = z.object({
   NODE_ENV: z.string().default('development'),
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required'),
-  GROQ_MODEL: z.string().default('llama-3.3-70b-versatile'),
+  GROQ_MODEL: z.string().default('openai/gpt-oss-120b'),
   HINDSIGHT_API_KEY: z.string().min(1, 'HINDSIGHT_API_KEY is required'),
   HINDSIGHT_BASE_URL: z.string().url().default('https://api.hindsight.vectorize.io'),
   HINDSIGHT_BANK_ID: z.string().min(1).default('opsrecall-incidents'),
