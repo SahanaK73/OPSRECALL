@@ -34,8 +34,11 @@ function mapGroqError(e: unknown): AppError {
  * schema validation, send the error back to the model and retry (max `maxAttempts`).
  */
 export async function generateAnalysis(system: string, user: string, maxAttempts = 3): Promise<{ analysis: LlmAnalysis; model: string }> {
-  const model = getEnv().GROQ_MODEL;
-  const isReasoningModel = /gpt-oss|qwen3/i.test(model);
+  let model = getEnv().GROQ_MODEL;
+  if (model === 'llama-3.3-70b-versatile' || !model) {
+    model = 'openai/gpt-oss-120b';
+  }
+  let isReasoningModel = /gpt-oss|qwen3/i.test(model);
   const messages: ChatMessage[] = [
     { role: 'system', content: system },
     { role: 'user', content: user },
@@ -56,6 +59,13 @@ export async function generateAnalysis(system: string, user: string, maxAttempts
       });
       content = completion.choices[0]?.message?.content ?? '';
     } catch (e) {
+      const status = (e as { status?: number })?.status;
+      if (status === 404 && model !== 'openai/gpt-oss-120b') {
+        logger.warn(`Groq model ${model} not found (404). Falling back to openai/gpt-oss-120b.`);
+        model = 'openai/gpt-oss-120b';
+        isReasoningModel = true;
+        continue;
+      }
       throw mapGroqError(e);
     }
 
